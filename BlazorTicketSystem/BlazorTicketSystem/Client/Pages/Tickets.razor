@@ -1,0 +1,68 @@
+﻿@page "/tickets"
+@using BlazorTicketSystem.Client.Components
+@using BlazorTicketSystem.Shared;
+@using BlazorTicketSystem.Shared.ViewModels
+@inject HttpClient Http
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                Earnings
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>                           
+                            <th>Subject</th>
+                            <th>Member</th>
+                             <th>Creation Date</th>
+                            <th>Last Status</th>
+                            <th>Last Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if(tickets == null)
+                        {
+                            <tr><td colspan="4"><em>Loading...</em></td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var todo in tickets)
+                            {
+                                <tr>                                    
+                                    <td>@((MarkupString)todo.ToDoSubject)</td>
+                                    <td>@todo.TeamMember</td>
+                                    <td>@todo.CreationDate.ToShortDateString()</td>
+                                    <td>@todo.LastStatus.ToString()</td>
+                                    <td>@todo.LastUpdate.ToString()</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <TicketForm OnSubmitCallback="@Refresh"></TicketForm>
+    </div>
+</div>
+@code {
+    private List<Ticket> tickets;
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        tickets = await Http.GetFromJsonAsync<List<Ticket>>("api/Ticket");
+        StateHasChanged();
+    }
+    public async void Refresh()
+    {
+        await LoadData();
+    }
+
+}
