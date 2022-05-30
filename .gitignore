@@ -19,6 +19,7 @@ mono_crash.*
 *.tt
 DbContext*.*
 appsettings.json
+SWTicket/
 
 # Build results
 [Dd]ebug/
