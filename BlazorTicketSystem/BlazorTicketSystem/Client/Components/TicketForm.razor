@@ -1,0 +1,41 @@
+﻿@using BlazorTicketSystem.Shared
+@using BlazorTicketSystem.Shared.Models
+@using BlazorTicketSystem.Shared.ViewModels
+@inject HttpClient Http
+<div class="card">
+    <div class="card-header">
+        Add an Ticket
+    </div>
+    <div class="card-body">
+        <EditForm Model="@ticket" OnValidSubmit="@HandlevalidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="form-group">
+                <label for="textAreaInput">Subject</label>
+                <InputTextArea class="form-control" id="textAreaInput" @bind-Value="ticket.ToDoSubject" />
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </EditForm>
+    </div>
+
+</div>
+@code {
+    private Ticket ticket = new Ticket { CreationDate = DateTime.Now.Date };
+
+    [Parameter]
+    public EventCallback OnSubmitCallback { get; set; }
+
+    private async Task HandlevalidSubmit()
+    {
+        ticket.TeamMember = Common.userName;
+        ticket.CompanyId = Common.tenantId;
+        ticket.CreationDate = DateTime.Now.Date;
+        ticket.LastStatus = "New";
+        ticket.LastUpdate = DateTime.Now;
+        ticket.ImageFileName = "gallery.png";
+        await Http.PostAsJsonAsync<Ticket>("api/Ticket", ticket);
+        await OnSubmitCallback.InvokeAsync();
+    }
+}

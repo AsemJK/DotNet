@@ -1,0 +1,12 @@
+C:\Code\_Git\SWTicket\SWTicket\Shared\bin\Debug\net5.0\SWTicket.Shared.deps.json
+C:\Code\_Git\SWTicket\SWTicket\Shared\bin\Debug\net5.0\SWTicket.Shared.dll
+C:\Code\_Git\SWTicket\SWTicket\Shared\bin\Debug\net5.0\SWTicket.Shared.pdb
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.csproj.AssemblyReference.cache
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.AssemblyInfoInputs.cache
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.AssemblyInfo.cs
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.csproj.CoreCompileInputs.cache
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.dll
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\refint\SWTicket.Shared.dll
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\SWTicket.Shared.pdb
+C:\Code\_Git\SWTicket\SWTicket\Shared\obj\Debug\net5.0\ref\SWTicket.Shared.dll
