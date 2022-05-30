@@ -18,6 +18,7 @@ mono_crash.*
 
 *.tt
 DbContext*.*
+appsettings.json
 
 # Build results
 [Dd]ebug/
