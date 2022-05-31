@@ -14,6 +14,15 @@
                 <label for="textAreaInput">Subject</label>
                 <InputTextArea class="form-control" id="textAreaInput" @bind-Value="ticket.ToDoSubject" />
             </div>
+            <div class="form-group">
+                <label for="tenantInput">Tenant</label>
+                <InputSelect id="tenantList" @bind-Value="ticket.TenantId">
+                    @foreach (var ten in ticket.Tenants)
+                    {
+                        <option value="@ten.CompanyId">@ten.CompanyName</option>
+                    }
+                </InputSelect>
+            </div>
             <div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
@@ -23,7 +32,29 @@
 </div>
 @code {
     private Ticket ticket = new Ticket { CreationDate = DateTime.Now.Date };
-
+    protected override void OnInitialized()
+    {
+        
+        ticket = new Ticket
+            {
+                Tenants = new List<Tenant>()
+                {
+                    new Tenant
+                    {
+                        CompanyId = 1,
+                        CompanyName = "PBMS",
+                    }
+                }
+            };
+        ticket.TenantId = 1;
+        
+        FillTenants();
+    }
+    private async void FillTenants()
+    {
+        ticket.Tenants = await Http.GetFromJsonAsync<List<Tenant>>("api/Ticket/Tenants");
+        StateHasChanged();
+    }
     [Parameter]
     public EventCallback OnSubmitCallback { get; set; }
 

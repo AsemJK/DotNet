@@ -23,34 +23,59 @@ namespace BlazorTicketSystem.Server.Controllers
         private readonly ISmSwService _pbmsService;
 
         [HttpGet]
-        public IEnumerable<TblToDo> Get(string key = "", int tenant = 0, string q = "")
+        public IEnumerable<Ticket> Get(string key = "", int tenant = 0, string q = "")
         {
             key = Common.testApiUserKey;
-            if (string.IsNullOrEmpty(key))
-                return Enumerable.Empty<TblToDo>();
-            else
+            var list = Enumerable.Empty<TblToDo>();
+            //    ; new IEnumerable<TblToDo>()
+            //{
+            //    new TblToDo
+            //    {
+            //        CompanyId = 0,
+            //        CreationDate = DateTime.Now.Date,
+            //        Id = 0,
+            //        ImageFileName = "gallery.jpg",
+            //        LastStatus = "",
+            //        LastUpdate = DateTime.Now,
+            //        TeamMember = "NA",
+            //        ToDoSubject = "NA",
+            //    }
+            //};
+            if (!string.IsNullOrEmpty(key))
             {
                 if (_pbmsService.CheckUserByApiKey(key))
                 {
                     if (tenant == 0)
                     {
                         if (q == "All")
-                            return _context.TblToDoes.ToList().OrderByDescending(n => n.Id);
+                            list =  _context.TblToDoes.ToList().OrderByDescending(n => n.Id);
                         else
-                            return _context.TblToDoes.Where(w => w.LastStatus.Contains(q)).ToList().OrderByDescending(n => n.Id);
+                            list = _context.TblToDoes.Where(w => w.LastStatus.Contains(q)).ToList().OrderByDescending(n => n.Id);
                     }
                     else
                     {
                         if (q == "All")
-                            return _context.TblToDoes.Where(t => t.CompanyId.Equals(tenant)).ToList().OrderByDescending(n => n.Id);
+                            list = _context.TblToDoes.Where(t => t.CompanyId.Equals(tenant)).ToList().OrderByDescending(n => n.Id);
                         else
-                            return _context.TblToDoes.Where(t => t.CompanyId.Equals(tenant)).Where(w => w.LastStatus.Contains(q)).ToList().OrderByDescending(n => n.Id);
+                            list = _context.TblToDoes.Where(t => t.CompanyId.Equals(tenant)).Where(w => w.LastStatus.Contains(q)).ToList().OrderByDescending(n => n.Id);
                     }
                 }
-                else
-                    return Enumerable.Empty<TblToDo>();
+                
+                return (from a in list join b in _context.TblCompanies
+                        on a.CompanyId equals b.CompanyId
+                        select new Ticket{ 
+                         CompanyId = a.CompanyId,
+                         CreationDate = a.CreationDate,
+                         Id = a.Id,
+                         ImageFileName = a.ImageFileName,
+                         LastStatus = a.LastStatus,
+                         LastUpdate = a.LastUpdate,
+                         TeamMember = a.TeamMember,
+                         TenantName = b.CompanyName,
+                         ToDoSubject = a.ToDoSubject,
+                        }).ToList().AsEnumerable<Ticket>();
             }
-            
+            return (IEnumerable<Ticket>)list;
         }
 
         [HttpPost]
@@ -171,6 +196,16 @@ namespace BlazorTicketSystem.Server.Controllers
                     return Enumerable.Empty<TblToDoDetail>();
             }
 
+        }
+
+        [HttpGet("[action]")]
+        public IEnumerable<TblCompany> Tenants(string key = "")
+        {
+            key = Common.testApiUserKey;
+            if (_pbmsService.CheckUserByApiKey(key))
+                return _context.TblCompanies.ToList();
+            else
+                return Enumerable.Empty<TblCompany>();
         }
     }
 }

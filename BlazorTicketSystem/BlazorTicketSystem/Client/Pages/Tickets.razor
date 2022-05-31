@@ -4,25 +4,59 @@
 @using BlazorTicketSystem.Shared.ViewModels
 @inject HttpClient Http
 
+
+<div class="col-lg-4">
+    <TicketForm OnSubmitCallback="@Refresh"></TicketForm>
+</div>
+
+<MudTable Items="@tickets" Bordered="true" Hover="true" Striped="true" Dense="true" Filter="new Func<Ticket,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Tickets</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>#</MudTh>
+        <MudTh>Subject</MudTh>
+        <MudTh>Member</MudTh>
+        <MudTh>Tenant</MudTh>
+        <MudTh>Cr Date</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Last Update</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="#">@context.Id</MudTd>
+        <MudTd DataLabel="Subject">@((MarkupString)context.ToDoSubject)</MudTd>
+        <MudTd DataLabel="Member Name">@context.TeamMember</MudTd>
+        <MudTd DataLabel="Tenant">@context.TenantName</MudTd>
+        <MudTd DataLabel="Cr Date">@context.CreationDate</MudTd>
+        <MudTd DataLabel="Last Status">@context.LastStatus</MudTd>
+        <MudTd DataLabel="Last Update">@context.LastUpdate</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[]{10,30,70,200}" />
+    </PagerContent>
+</MudTable>
+@*
 <div class="row">
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                Earnings
+                Tickets
             </div>
             <div class="card-body">
                 <table class="table table-striped">
                     <thead>
-                        <tr>                           
+                        <tr>
                             <th>Subject</th>
                             <th>Member</th>
-                             <th>Creation Date</th>
+                            <th>Creation Date</th>
                             <th>Last Status</th>
                             <th>Last Update</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @if(tickets == null)
+                        @if (tickets == null)
                         {
                             <tr><td colspan="4"><em>Loading...</em></td></tr>
                         }
@@ -30,7 +64,7 @@
                         {
                             @foreach (var todo in tickets)
                             {
-                                <tr>                                    
+                                <tr>
                                     <td>@((MarkupString)todo.ToDoSubject)</td>
                                     <td>@todo.TeamMember</td>
                                     <td>@todo.CreationDate.ToShortDateString()</td>
@@ -44,12 +78,16 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <TicketForm OnSubmitCallback="@Refresh"></TicketForm>
-    </div>
 </div>
+*@
 @code {
+
     private List<Ticket> tickets;
+
+    private string searchString1 = "";
+    private Ticket selectedItem1 = null;
+    private HashSet<Ticket> selectedItems = new HashSet<Ticket>();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -63,6 +101,23 @@
     public async void Refresh()
     {
         await LoadData();
+    }
+
+    private bool FilterFunc1(Ticket element) => FilterFunc(element, searchString1);
+
+    private bool FilterFunc(Ticket element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.ToDoSubject.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.TeamMember.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.TenantName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Id.ToString().Equals(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
     }
 
 }

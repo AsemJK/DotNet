@@ -36,8 +36,9 @@ namespace BlazorTicketSystem.Server.Controllers
                     Amount = 2000,
                 }
             };
-            //return _earningsRpository.GetAll()
-            //    .OrderByDescending(w => w.Date);
+            return _earningsRpository.GetAll()
+                .OrderByDescending(w => w.Date);
+            /*
             list = (from a in _saasdbDB.TblToDoes
                    select new Earning()
                    {
@@ -47,6 +48,7 @@ namespace BlazorTicketSystem.Server.Controllers
                        Category = EarningCategory.Freelancing,
                    }).ToList();
             return list;
+            */
         }
 
         [HttpPost]

@@ -17,5 +17,8 @@ namespace BlazorTicketSystem.Shared.ViewModels
 		public decimal CompanyId { get; set; } // decimal(10,0)
 		public string ImageFileName { get; set; }
 		public DateTime LastUpdate { get; set; } // datetime
-	}
+        public string TenantName { get; set; }
+        public int TenantId { get; set; }
+        public List<Tenant> Tenants { get; set; }
+    }
 }
