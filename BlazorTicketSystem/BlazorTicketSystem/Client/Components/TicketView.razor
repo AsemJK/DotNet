@@ -1,0 +1,34 @@
+﻿@page "/ticket/{id}"
+@inject HttpClient Http
+@using BlazorTicketSystem.Shared.ViewModels
+<h3>Ticket Details</h3>
+
+<div class="container">
+    <div class="card-deck">
+        <div class="card">
+            <div class="card-header">
+                <h5>@((MarkupString)ticket.ToDoSubject)</h5>
+            </div>
+            <div class="card-body">
+                <img src="@ticket.ImageFileName" width="auto" />
+            </div>
+            <div class="card-footer">
+                Footer
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+    private Ticket ticket = new Ticket();
+    protected override async Task OnInitializedAsync()
+    {
+        ticket = await Http.GetFromJsonAsync<Ticket>("api/Ticket/Detail/" + Id);
+
+    }
+
+}

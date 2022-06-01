@@ -1,8 +1,24 @@
 ﻿@inherits LayoutComponentBase
-<MudThemeProvider/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
 <div class="page">
+    <MudAppBar Color="Color.Primary">
+        <MudText Typo="Typo.h4" class="px-4">Blazor Ticket System</MudText>
+        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+    </MudAppBar>
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+    <div class="main pt-10">
+        <div class="content px-4">
+            @Body
+        </div>
+    </div>
+</div>
+
+@*<div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
@@ -16,4 +32,4 @@
             @Body
         </div>
     </div>
-</div>
+</div>*@

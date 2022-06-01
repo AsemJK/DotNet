@@ -48,3 +48,20 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+#app{
+    width: 100%;
+}
+.splashdiv{
+    width: 100%;
+}
+.splashdiv img{
+    margin-left: 50%;
+}
+
+.ml-md-auto, .mx-md-auto {
+    color: white !important;
+}
+
+.pt-10, .py-10 {
+    padding-top: 60px !important;
+}

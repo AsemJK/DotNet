@@ -27,20 +27,7 @@ namespace BlazorTicketSystem.Server.Controllers
         {
             key = Common.testApiUserKey;
             var list = Enumerable.Empty<TblToDo>();
-            //    ; new IEnumerable<TblToDo>()
-            //{
-            //    new TblToDo
-            //    {
-            //        CompanyId = 0,
-            //        CreationDate = DateTime.Now.Date,
-            //        Id = 0,
-            //        ImageFileName = "gallery.jpg",
-            //        LastStatus = "",
-            //        LastUpdate = DateTime.Now,
-            //        TeamMember = "NA",
-            //        ToDoSubject = "NA",
-            //    }
-            //};
+          
             if (!string.IsNullOrEmpty(key))
             {
                 if (_pbmsService.CheckUserByApiKey(key))
@@ -137,6 +124,7 @@ namespace BlazorTicketSystem.Server.Controllers
         [HttpGet("[action]/{id}")]
         public TblToDo Detail(string key = "", int id = 0)
         {
+            key = Common.testApiUserKey;
             if (string.IsNullOrEmpty(key))
                 return new TblToDo();
             else
@@ -206,6 +194,31 @@ namespace BlazorTicketSystem.Server.Controllers
                 return _context.TblCompanies.ToList();
             else
                 return Enumerable.Empty<TblCompany>();
+        }
+
+        [HttpPost("UpdateTicketStatus")]
+        public async Task<TblToDo> UpdateTicketStatus(Ticket ticket, string key = "")
+        {
+            key = Common.testApiUserKey;
+            TblToDo OldTodo = _context.TblToDoes.FirstOrDefault(t => t.Id.Equals(ticket.Id));
+            TblToDo NewTodo = new TblToDo();
+            if (!string.IsNullOrEmpty(key))
+            {
+                if (_pbmsService.CheckUserByApiKey(key) && OldTodo.Id > 0)
+                {
+                    await _context.TblToDoes
+                         .Where(r => r.Id.Equals(OldTodo.Id))
+                         .Set(p => p.LastStatus, ticket.LastStatus)
+                         .UpdateAsync();
+                    _context.CommitTransaction();
+                    NewTodo = _context.TblToDoes.FirstOrDefault(r => r.Id.Equals(OldTodo.Id));
+                    return NewTodo;
+                }
+                else
+                    return NewTodo;
+            }
+            else
+                return NewTodo;
         }
     }
 }

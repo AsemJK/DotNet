@@ -1,0 +1,32 @@
+﻿<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.TaskAlt" Class="mr-3"/> Are you sure?
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudRadioGroup @bind-SelectedOption="@NewStatus">
+            <MudRadio Option="1" Color="Color.Primary" Size="Size.Large">New</MudRadio>
+            <MudRadio Option="2" Color="Color.Secondary" Size="Size.Large">Under Review</MudRadio>
+            <MudRadio Option="3" Color="Color.Tertiary" Size="Size.Large">Done</MudRadio>
+        </MudRadioGroup>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code{
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    void Submit()
+    {        
+        MudDialog.Close(DialogResult.Ok(NewStatus));        
+    }
+    void Cancel() => MudDialog.Cancel();
+
+    public int NewStatus { get; set; } = 1;
+    [Parameter]
+    public int TicketId { get; set; }
+}

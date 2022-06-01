@@ -3,6 +3,9 @@
 @using BlazorTicketSystem.Shared;
 @using BlazorTicketSystem.Shared.ViewModels
 @inject HttpClient Http
+@inject IDialogService DialogService
+@inject NavigationManager navationManager
+
 
 
 <div class="col-lg-4">
@@ -10,12 +13,16 @@
 </div>
 
 <MudTable Items="@tickets" Bordered="true" Hover="true" Striped="true" Dense="true" Filter="new Func<Ticket,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
+    <NoRecordsContent>
+        Loading...
+    </NoRecordsContent>
     <ToolBarContent>
         <MudText Typo="Typo.h6">Tickets</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <HeaderContent>
+        <MudTh></MudTh>
         <MudTh>#</MudTh>
         <MudTh>Subject</MudTh>
         <MudTh>Member</MudTh>
@@ -25,6 +32,12 @@
         <MudTh>Last Update</MudTh>
     </HeaderContent>
     <RowTemplate>
+        <MudButton OnClick="(e) => ChangeTicketStatus(context.Id)" Variant="Variant.Filled" Color="Color.Primary">
+            <MudIcon Icon="@Icons.Filled.ChangeCircle"></MudIcon>
+        </MudButton>
+        <MudButton OnClick="(e) => TicketGoToDetails(context.Id.ToString())" Variant="Variant.Filled" Color="Color.Primary">
+            <MudIcon Icon="@Icons.Filled.OpenInNew"></MudIcon>
+        </MudButton>
         <MudTd DataLabel="#">@context.Id</MudTd>
         <MudTd DataLabel="Subject">@((MarkupString)context.ToDoSubject)</MudTd>
         <MudTd DataLabel="Member Name">@context.TeamMember</MudTd>
@@ -34,52 +47,11 @@
         <MudTd DataLabel="Last Update">@context.LastUpdate</MudTd>
     </RowTemplate>
     <PagerContent>
-        <MudTablePager PageSizeOptions="new int[]{10,30,70,200}" />
+        <MudTablePager PageSizeOptions="pageSizeOptions" />
     </PagerContent>
 </MudTable>
-@*
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                Tickets
-            </div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Member</th>
-                            <th>Creation Date</th>
-                            <th>Last Status</th>
-                            <th>Last Update</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (tickets == null)
-                        {
-                            <tr><td colspan="4"><em>Loading...</em></td></tr>
-                        }
-                        else
-                        {
-                            @foreach (var todo in tickets)
-                            {
-                                <tr>
-                                    <td>@((MarkupString)todo.ToDoSubject)</td>
-                                    <td>@todo.TeamMember</td>
-                                    <td>@todo.CreationDate.ToShortDateString()</td>
-                                    <td>@todo.LastStatus.ToString()</td>
-                                    <td>@todo.LastUpdate.ToString()</td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-*@
+
+
 @code {
 
     private List<Ticket> tickets;
@@ -87,6 +59,7 @@
     private string searchString1 = "";
     private Ticket selectedItem1 = null;
     private HashSet<Ticket> selectedItems = new HashSet<Ticket>();
+    private int[] pageSizeOptions = new int[] { 5, 10, 15 };
 
     protected override async Task OnInitializedAsync()
     {
@@ -120,4 +93,37 @@
         return false;
     }
 
+    private async Task ChangeTicketStatus(int tktId)
+    {
+        var parameters = new DialogParameters { ["ticketId"] = tktId };
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = DialogService.Show<TicketStatus>("Simple Dialog", parameters, options);
+        var result = await dialog.Result;
+        Ticket ticket = new Ticket();
+        ticket.Id = tktId;
+        switch (Common.ToIntConvertObject(result.Data, 0).ToString())
+        {
+            case "1":
+                break;
+                ticket.LastStatus = "New";
+                await Http.PostAsJsonAsync<Ticket>("api/Ticket/UpdateTicketStatus", ticket);
+            case "2":
+                ticket.LastStatus = "UnderReview";
+                await Http.PostAsJsonAsync<Ticket>("api/Ticket/UpdateTicketStatus", ticket);
+                break;
+            case "3":
+                ticket.LastStatus = "Done";
+                await Http.PostAsJsonAsync<Ticket>("api/Ticket/UpdateTicketStatus", ticket);
+                break;
+            default:
+                ticket.LastStatus = "New";
+                await Http.PostAsJsonAsync<Ticket>("api/Ticket/UpdateTicketStatus", ticket);
+                break;
+        }
+        Refresh();
+    }
+    private void TicketGoToDetails(string id)
+    {
+        navationManager.NavigateTo("/ticket/" + id);
+    }
 }
