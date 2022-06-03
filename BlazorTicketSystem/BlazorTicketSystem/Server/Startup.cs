@@ -34,7 +34,7 @@ namespace BlazorTicketSystem.Server
             services.AddScoped<IRepository<Earning>, MemoryRepository<Earning>>();
             services.AddScoped<IRestService, RestService>();
             
-            services.AddLinqToDBContext<SaasdbDB>((provider, options) => {
+            services.AddLinqToDBContext<DbContext>((provider, options) => {
                 options.UseMySql(Configuration.GetConnectionString("MysqlConnection"))
                 .UseDefaultLogging(provider);
             });

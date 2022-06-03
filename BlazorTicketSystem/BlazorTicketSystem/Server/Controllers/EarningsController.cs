@@ -14,13 +14,13 @@ namespace BlazorTicketSystem.Server.Controllers
     public class EarningsController : ControllerBase
     {
         private readonly Storage.IRepository<Earning> _earningsRpository;
-        private readonly SaasdbDB _saasdbDB;
+        private readonly DbContext _dbContext;
 
         public EarningsController(IRepository<Earning> earningsRpository,
-            SaasdbDB saasdbDB)
+            DbContext dbContext)
         {
             _earningsRpository = earningsRpository;
-            _saasdbDB = saasdbDB;
+            _dbContext = dbContext;
         }
         [HttpGet]
         public IEnumerable<Earning> Get()
@@ -38,17 +38,6 @@ namespace BlazorTicketSystem.Server.Controllers
             };
             return _earningsRpository.GetAll()
                 .OrderByDescending(w => w.Date);
-            /*
-            list = (from a in _saasdbDB.TblToDoes
-                   select new Earning()
-                   {
-                       Subject = a.ToDoSubject,
-                       Date = Convert.ToDateTime(a.CreationDate),
-                       Amount = a.Id,
-                       Category = EarningCategory.Freelancing,
-                   }).ToList();
-            return list;
-            */
         }
 
         [HttpPost]

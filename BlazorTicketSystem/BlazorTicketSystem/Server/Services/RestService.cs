@@ -13,18 +13,18 @@ namespace BlazorTicketSystem.Server
 {
     public class RestService : IRestService
     {
-        private readonly SaasdbDB _saasdbDBContext;
+        private readonly DbContext _dbContext;
 
-        public RestService(SaasdbDB saasdbDBContext)
+        public RestService(DbContext dbContext)
         {
-            _saasdbDBContext = saasdbDBContext;
+            _dbContext = dbContext;
         }
         public bool CheckUserByApiKey(string apiKey)
         {
             bool isValid = false;
             DateTime ApiExpiry;
             TblUser user;
-            user = _saasdbDBContext.TblUsers.FirstOrDefault(x => x.ApiKey == apiKey);
+            user = _dbContext.TblUsers.FirstOrDefault(x => x.ApiKey == apiKey);
             if(user == null)
                 return false;
             else
@@ -38,7 +38,7 @@ namespace BlazorTicketSystem.Server
 
         public async Task<TblUser> CheckLogin(string userName, string password)
         {
-            var user = _saasdbDBContext.TblUsers.FirstOrDefault(r => r.UserName.Equals(userName) && r.Password.Equals(Pcode112.Encrypt(password)));
+            var user = _dbContext.TblUsers.FirstOrDefault(r => r.UserName.Equals(userName) && r.Password.Equals(Pcode112.Encrypt(password)));
             return user;
         }
     }

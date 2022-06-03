@@ -17,14 +17,14 @@ namespace BlazorTicketSystem.Server.Controllers
     [ApiController]
     public class TicketController : ControllerBase
     {
-        public TicketController(SaasdbDB context, IRestService pbmsService,
+        public TicketController(DbContext context, IRestService pbmsService,
             IWebHostEnvironment webHost)
         {
             _context = context;
             _pbmsService = pbmsService;
             _webHost = webHost;
         }
-        private readonly SaasdbDB _context;
+        private readonly DbContext _context;
         private readonly IRestService _pbmsService;
         private readonly IWebHostEnvironment _webHost;
 
