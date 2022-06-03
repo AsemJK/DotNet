@@ -65,3 +65,14 @@ a, .btn-link {
 .pt-10, .py-10 {
     padding-top: 60px !important;
 }
+
+.nav {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+    margin-top: 50px !important;
+}

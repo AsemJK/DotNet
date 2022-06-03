@@ -7,6 +7,7 @@ namespace BlazorTicketSystem.Shared
         public static string testApiUserKey = "3AOQ8JIOQ8X9GWSGYX3R";
         public static string userName = "Test";
         public static int tenantId = 1;
+        public static decimal userCompanyId = 1;
 
         public static decimal ToDecimalConvertObject(object obj, decimal alterValue)
         {

@@ -32,7 +32,8 @@ namespace BlazorTicketSystem.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddScoped<IRepository<Earning>, MemoryRepository<Earning>>();
-            services.AddScoped<ISmSwService, SmSwService>();
+            services.AddScoped<IRestService, RestService>();
+            
             services.AddLinqToDBContext<SaasdbDB>((provider, options) => {
                 options.UseMySql(Configuration.GetConnectionString("MysqlConnection"))
                 .UseDefaultLogging(provider);
@@ -56,9 +57,10 @@ namespace BlazorTicketSystem.Server
 
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
-            app.UseStaticFiles();
+            
 
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseEndpoints(endpoints =>
             {

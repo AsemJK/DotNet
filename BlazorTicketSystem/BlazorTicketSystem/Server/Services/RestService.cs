@@ -1,17 +1,21 @@
-﻿using DataModels;
+﻿using BlazorTicketSystem.Shared;
+using BlazorTicketSystem.Shared.ViewModels;
+using DataModels;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorTicketSystem.Server
 {
-    public class SmSwService : ISmSwService
+    public class RestService : IRestService
     {
         private readonly SaasdbDB _saasdbDBContext;
 
-        public SmSwService(SaasdbDB saasdbDBContext)
+        public RestService(SaasdbDB saasdbDBContext)
         {
             _saasdbDBContext = saasdbDBContext;
         }
@@ -30,6 +34,12 @@ namespace BlazorTicketSystem.Server
                 else
                     return false;
             }
+        }
+
+        public async Task<TblUser> CheckLogin(string userName, string password)
+        {
+            var user = _saasdbDBContext.TblUsers.FirstOrDefault(r => r.UserName.Equals(userName) && r.Password.Equals(Pcode112.Encrypt(password)));
+            return user;
         }
     }
 }

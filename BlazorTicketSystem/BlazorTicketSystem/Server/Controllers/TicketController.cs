@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BlazorTicketSystem.Shared;
 using BlazorTicketSystem.Shared.ViewModels;
 using DataModels;
 using LinqToDB;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorTicketSystem.Server.Controllers
@@ -14,13 +17,16 @@ namespace BlazorTicketSystem.Server.Controllers
     [ApiController]
     public class TicketController : ControllerBase
     {
-        public TicketController(SaasdbDB context, ISmSwService pbmsService)
+        public TicketController(SaasdbDB context, IRestService pbmsService,
+            IWebHostEnvironment webHost)
         {
             _context = context;
             _pbmsService = pbmsService;
+            _webHost = webHost;
         }
         private readonly SaasdbDB _context;
-        private readonly ISmSwService _pbmsService;
+        private readonly IRestService _pbmsService;
+        private readonly IWebHostEnvironment _webHost;
 
         [HttpGet]
         public IEnumerable<Ticket> Get(string key = "", int tenant = 0, string q = "")
@@ -69,6 +75,7 @@ namespace BlazorTicketSystem.Server.Controllers
         public async Task<TblToDo> Add([FromBody] Ticket todo, string key = "")
         {
             key = Common.testApiUserKey;
+          
             TblToDo lastEntry = new TblToDo
             {
                 Id = 0,
@@ -93,6 +100,24 @@ namespace BlazorTicketSystem.Server.Controllers
                 }
             }
             return lastEntry;
+        }
+
+        [HttpPost("UploadFile")]
+        public async Task<IActionResult> Upload(IFormCollection payload)
+        {           
+            string fileNewNormalizedName = "gallery.png";
+            if (payload.Files.Count > 0)
+            {
+                var formFile = payload.Files[0];
+                fileNewNormalizedName = "task_" + DateTime.Now.Year.ToString() + new Random().Next().ToString() + ".jpg";
+                var fulPath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot","images", "issues" , fileNewNormalizedName).Replace("Server","Client");
+                using (FileStream fs = System.IO.File.Create(fulPath))
+                {
+                    formFile.CopyTo(fs);
+                    fs.Flush();
+                }
+            }
+            return Ok(fileNewNormalizedName);
         }
 
         [HttpPost("UpdateToDo")]
@@ -142,9 +167,10 @@ namespace BlazorTicketSystem.Server.Controllers
 
         }
 
-        [HttpPost("ToDoAddComment")]
+        [HttpPost("TicketAddComment")]
         public TblToDoDetail ToDoAddComment(TblToDoDetail toDoDetails, string key = "")
         {
+            key = Common.testApiUserKey;
             TblToDo OldTodo = _context.TblToDoes.FirstOrDefault(t => t.Id.Equals(toDoDetails.ToDoId));
             int newToDoCommentSerial = 0;
             newToDoCommentSerial = _context.TblToDoDetails.Where(f => f.ToDoId.Equals(toDoDetails.ToDoId)).ToList().Count + 1;
@@ -172,6 +198,7 @@ namespace BlazorTicketSystem.Server.Controllers
         [HttpGet("ToDoDetails")]
         public IEnumerable<TblToDoDetail> GetDetails(int ticketId, string key = "")
         {
+            key = Common.testApiUserKey;
             if (string.IsNullOrEmpty(key))
                 return Enumerable.Empty<TblToDoDetail>();
             else
@@ -186,7 +213,7 @@ namespace BlazorTicketSystem.Server.Controllers
 
         }
 
-        [HttpGet("[action]")]
+        [HttpGet("Tenants")]
         public IEnumerable<TblCompany> Tenants(string key = "")
         {
             key = Common.testApiUserKey;

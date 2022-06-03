@@ -1,7 +1,13 @@
 ﻿@page "/"
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Welcome, Please login first  </h1>
+    </NotAuthorized>
+    <Authorized>
+        <h1>Welcome back, @LocalStorage.GetItemAsString("username")!</h1>
+        <h1>Hello, world!</h1>
+        Welcome to Blazor Helpdesk!
+        <SurveyPrompt Title="How is Blazor working for you?" />
+    </Authorized>
+</AuthorizeView>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />

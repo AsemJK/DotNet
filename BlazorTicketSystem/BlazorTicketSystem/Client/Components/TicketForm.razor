@@ -1,6 +1,7 @@
 ﻿@using BlazorTicketSystem.Shared
 @using BlazorTicketSystem.Shared.Models
 @using BlazorTicketSystem.Shared.ViewModels
+@using System.Net.Http.Headers
 @inject HttpClient Http
 <div class="card">
     <div class="card-header">
@@ -23,18 +24,44 @@
                     }
                 </InputSelect>
             </div>
+            <div class="form-group">
+                <InputFile id="fileInput" OnChange="UploadFiles" hidden />
+                <MudButton HtmlTag="label"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Filled.CloudUpload"
+                           for="fileInput">
+                    Support Files (Optional)
+                </MudButton>
+            </div>
+
             <div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
         </EditForm>
     </div>
 
+
+    <div class="card-footer">
+        @if (files != null && files.Count() > 0)
+        {
+            <MudText Typo="@Typo.h6">@files.Count() File@(files.Count() == 1 ? "" : "s"):</MudText>
+            <MudList>
+                @foreach (var file in files)
+                {
+                    <MudListItem Icon="@Icons.Filled.AttachFile" @key="@file">
+                        @file.Name <code>@file.Size bytes</code>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </div>
 </div>
 @code {
     private Ticket ticket = new Ticket { CreationDate = DateTime.Now.Date };
     protected override void OnInitialized()
     {
-        
+
         ticket = new Ticket
             {
                 Tenants = new List<Tenant>()
@@ -47,7 +74,7 @@
                 }
             };
         ticket.TenantId = 1;
-        
+
         FillTenants();
     }
     private async void FillTenants()
@@ -57,7 +84,7 @@
     }
     [Parameter]
     public EventCallback OnSubmitCallback { get; set; }
-
+    public string UploadedFileName { get; set; }
     private async Task HandlevalidSubmit()
     {
         ticket.TeamMember = Common.userName;
@@ -65,8 +92,34 @@
         ticket.CreationDate = DateTime.Now.Date;
         ticket.LastStatus = "New";
         ticket.LastUpdate = DateTime.Now;
-        ticket.ImageFileName = "gallery.png";
+        ticket.ImageFileName = UploadedFileName == string.Empty ? "gallery.png" : UploadedFileName;
         await Http.PostAsJsonAsync<Ticket>("api/Ticket", ticket);
         await OnSubmitCallback.InvokeAsync();
+    }
+
+    //files uploading
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+    private async Task UploadFiles(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            files.Add(file);
+        }
+        foreach (var imageFile in files)
+        {
+            if (imageFile != null)
+            {
+                var resizedFile = await imageFile.RequestImageFileAsync("image/png", 300, 500);
+
+                using (var ms = resizedFile.OpenReadStream(resizedFile.Size))
+                {
+                    var content = new MultipartFormDataContent();
+                    content.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+                    content.Add(new StreamContent(ms, Convert.ToInt32(resizedFile.Size)), "image", imageFile.Name);
+                    var imageFileName = await Http.PostAsync("api/Ticket/UploadFile", content);
+                    UploadedFileName = imageFileName.Content.ReadAsStringAsync().Result.ToString();
+                }
+            }
+        }
     }
 }

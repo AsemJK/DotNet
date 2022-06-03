@@ -1,0 +1,69 @@
+﻿@page "/login"
+@inject HttpClient Http
+@inject NavigationManager navicationManager
+@inject ILocalStorageService localStorage
+
+
+
+@using BlazorTicketSystem.Shared.ViewModels
+@using Newtonsoft.Json
+
+<h3>Login to System</h3>
+<div class="card text-light" style="background-color: rgb(62, 48, 84);">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>Username</label>
+                <InputText @bind-Value="model.UserName" class="form-control" />
+                <ValidationMessage For="@(() => model.UserName)" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.Password)" />
+            </div>
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Login
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private User model = new User();
+    private bool loading;
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            var res = await Http.PostAsJsonAsync<User>("api/User/Login", model);
+            var objectModel = JsonConvert.DeserializeObject<User>(res.Content.ReadAsStringAsync().Result);
+            if (objectModel.UserId > 0)
+            {
+                Common.userName = objectModel.UserName;
+                ToastServiceInstanse.ShowSuccess("Logined Successfully", "Ok");
+                await localStorage.SetItemAsync<string>("username", objectModel.UserName);
+                await AuthStateProvider.GetAuthenticationStateAsync();
+                navicationManager.NavigateTo("");
+            }
+            else
+            {
+                ToastServiceInstanse.ShowError("Failed Login", "Error");
+                loading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

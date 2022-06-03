@@ -4,55 +4,66 @@
 @using BlazorTicketSystem.Shared.ViewModels
 @inject HttpClient Http
 @inject IDialogService DialogService
-@inject NavigationManager navationManager
+
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Welcome, Please login first  </h1>
+    </NotAuthorized>
+    <Authorized>
+
+        <div class="col-lg-4">
+            <TicketForm OnSubmitCallback="@Refresh"></TicketForm>
+        </div>
+
+        @if (tickets == null)
+        {
+            <MudProgressCircular Style="margin-left: 40%" Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+        }
+
+        <MudTable Items="@tickets" Bordered="true" Context="tableContext" Hover="true" Striped="true" Dense="true" Filter="new Func<Ticket,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
+            <NoRecordsContent>
+                Loading...
+            </NoRecordsContent>
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Tickets</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh></MudTh>
+                <MudTh>#</MudTh>
+                <MudTh>Subject</MudTh>
+                <MudTh>Member</MudTh>
+                <MudTh>Tenant</MudTh>
+                <MudTh>Cr Date</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Last Update</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudButton OnClick="(e) => ChangeTicketStatus(tableContext.Id)" Variant="Variant.Filled" Color="Color.Primary" Style="margin:1px">
+                    <MudIcon Icon="@Icons.Filled.ChangeCircle"></MudIcon>
+                </MudButton>
+                <MudButton OnClick="(e) => TicketGoToDetails(tableContext.Id.ToString())" Variant="Variant.Filled" Color="Color.Primary" Style="margin:1px" title="Open Ticket" Target="_Blank">
+                    <MudIcon Icon="@Icons.Filled.OpenInNew"></MudIcon>
+                </MudButton>
+                <MudTd DataLabel="#">@tableContext.Id</MudTd>
+                <MudTd DataLabel="Subject" Style="text-align: center">@((MarkupString)tableContext.ToDoSubject)</MudTd>
+                    <MudTd DataLabel="Member Name">@tableContext.TeamMember</MudTd>
+                    <MudTd DataLabel="Tenant">@tableContext.TenantName</MudTd>
+                    <MudTd DataLabel="Cr Date">@tableContext.CreationDate</MudTd>
+                    <MudTd DataLabel="Last Status">@tableContext.LastStatus</MudTd>
+                    <MudTd DataLabel="Last Update">@tableContext.LastUpdate</MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="pageSizeOptions" />
+                </PagerContent>
+            </MudTable>
+
+        </Authorized>
+    </AuthorizeView>
 
 
-
-<div class="col-lg-4">
-    <TicketForm OnSubmitCallback="@Refresh"></TicketForm>
-</div>
-
-<MudTable Items="@tickets" Bordered="true" Hover="true" Striped="true" Dense="true" Filter="new Func<Ticket,bool>(FilterFunc1)" @bind-SelectedItem="selectedItem1">
-    <NoRecordsContent>
-        Loading...
-    </NoRecordsContent>
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Tickets</MudText>
-        <MudSpacer />
-        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <HeaderContent>
-        <MudTh></MudTh>
-        <MudTh>#</MudTh>
-        <MudTh>Subject</MudTh>
-        <MudTh>Member</MudTh>
-        <MudTh>Tenant</MudTh>
-        <MudTh>Cr Date</MudTh>
-        <MudTh>Status</MudTh>
-        <MudTh>Last Update</MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudButton OnClick="(e) => ChangeTicketStatus(context.Id)" Variant="Variant.Filled" Color="Color.Primary">
-            <MudIcon Icon="@Icons.Filled.ChangeCircle"></MudIcon>
-        </MudButton>
-        <MudButton OnClick="(e) => TicketGoToDetails(context.Id.ToString())" Variant="Variant.Filled" Color="Color.Primary">
-            <MudIcon Icon="@Icons.Filled.OpenInNew"></MudIcon>
-        </MudButton>
-        <MudTd DataLabel="#">@context.Id</MudTd>
-        <MudTd DataLabel="Subject">@((MarkupString)context.ToDoSubject)</MudTd>
-        <MudTd DataLabel="Member Name">@context.TeamMember</MudTd>
-        <MudTd DataLabel="Tenant">@context.TenantName</MudTd>
-        <MudTd DataLabel="Cr Date">@context.CreationDate</MudTd>
-        <MudTd DataLabel="Last Status">@context.LastStatus</MudTd>
-        <MudTd DataLabel="Last Update">@context.LastUpdate</MudTd>
-    </RowTemplate>
-    <PagerContent>
-        <MudTablePager PageSizeOptions="pageSizeOptions" />
-    </PagerContent>
-</MudTable>
-
-
-@code {
+    @code {
 
     private List<Ticket> tickets;
 
@@ -63,7 +74,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadData();
+        var st = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (st.User != null)
+            await LoadData();
     }
 
     private async Task LoadData()

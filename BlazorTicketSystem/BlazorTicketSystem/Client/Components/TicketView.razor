@@ -1,34 +1,80 @@
 ﻿@page "/ticket/{id}"
 @inject HttpClient Http
 @using BlazorTicketSystem.Shared.ViewModels
-<h3>Ticket Details</h3>
 
-<div class="container">
-    <div class="card-deck">
-        <div class="card">
-            <div class="card-header">
-                <h5>@((MarkupString)ticket.ToDoSubject)</h5>
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Welcome, Please login first  </h1>
+    </NotAuthorized>
+    <Authorized>
+        <h3>Ticket Details</h3>
+        <div class="container">
+            <MudButton OnClick="BackToTickets">
+                Back
+                <MudIcon Icon="@Icons.Filled.ArrowBack"></MudIcon>
+            </MudButton>
+            @if (ticket.Id == 0)
+            {
+                <MudProgressCircular Style="margin-left: 40%" Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            }
+            <div class="card-deck">
+                <div class="card">
+                    <div class="card-header" style="text-align: center;direction:rtl">
+                        <h5>@((MarkupString)ticket.ToDoSubject)</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (ticket.ImageFileName != null)
+                        {
+                            <img src="images/issues/@ticket.ImageFileName" width="auto" />
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <TicketHistory TktId="@Id" @ref="history"></TicketHistory>
+                    </div>
+
+                    <h4>Add New Comment</h4>
+                    <div class="form-group">
+                        <EditorComponent EditorHeight="200px" EditorWidth="600px" @bind-EditorValue="editorValue"></EditorComponent>
+                        <input type="button" @onclick="SaveComment" id="btnSaveTicketComment" class="btn btn-success" value="Save" />
+                    </div>
+
+                </div>
             </div>
-            <div class="card-body">
-                <img src="@ticket.ImageFileName" width="auto" />
-            </div>
-            <div class="card-footer">
-                Footer
-            </div>
+
         </div>
-    </div>
-
-</div>
-
+    </Authorized>
+</AuthorizeView>
 
 @code {
+
     [Parameter]
     public string Id { get; set; }
     private Ticket ticket = new Ticket();
+
+    private string editorValue = "_";
     protected override async Task OnInitializedAsync()
     {
         ticket = await Http.GetFromJsonAsync<Ticket>("api/Ticket/Detail/" + Id);
+    }
+    [Inject]
+    public NavigationManager navicationManager { get; set; }
 
+    protected TicketHistory history;
+
+    private void BackToTickets()
+    {
+        navicationManager.NavigateTo("/tickets");
     }
 
+    private async Task SaveComment()
+    {
+        TicketDetail comment = new TicketDetail();
+        comment.ToDoId = ticket.Id;
+        comment.Notes = editorValue;
+        comment.TeamMember = Common.userName;
+        await Http.PostAsJsonAsync<TicketDetail>("api/Ticket/TicketAddComment", comment);
+        ToastServiceInstanse.ShowInfo("Done");
+        history.TktId = ticket.Id.ToString();
+        history.LoadDetails();
+    }
 }

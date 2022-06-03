@@ -1,0 +1,43 @@
+﻿@using BlazorTicketSystem.Shared.ViewModels
+@inject HttpClient Http
+
+<h5>TicketHistory</h5>
+
+@if (ticketDetailsList.Count == 0)
+{
+    <MudProgressLinear></MudProgressLinear>
+}
+else
+{
+    foreach (var item in ticketDetailsList)
+    {
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    @item.TeamMember - @item.Slno
+                </div>
+                <div class="card-body" style="text-align: center" >
+                    @((MarkupString)item.Notes)
+                </div>
+                
+
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public string TktId { get; set; }
+    private List<TicketDetail> ticketDetailsList;
+    protected override async Task OnInitializedAsync()
+    {
+        LoadDetails();
+    }
+    public async Task LoadDetails()
+    {
+        ticketDetailsList = new List<TicketDetail>();
+        ticketDetailsList = await Http.GetFromJsonAsync<List<TicketDetail>>("api/Ticket/ToDoDetails?ticketId=" + TktId);
+        StateHasChanged();
+    }
+}
